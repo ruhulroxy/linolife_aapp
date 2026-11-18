@@ -92,7 +92,7 @@ effect. Syncing web assets alone does not update an APK or an iOS installation.
 
 ## Firebase push notifications
 
-Both native apps use Firebase project `linolife` and require a registration for `co.linolife.aapp` on each platform:
+Both Android and iOS use Firebase project `linolife-8901b` with app ID `co.linolife.aapp`.
 
 - Android config: `android/app/google-services.json`. The Google Services Gradle
   plugin is required, so a missing or mismatched config fails the build.
@@ -107,14 +107,12 @@ Both native apps use Firebase project `linolife` and require a registration for 
 - Debug uses the development APNs entitlement; Release uses production. No silent
   background notification handler is implemented.
 
-The hosted website currently expects `median.firebaseMessaging`. The bundled
-`www/native-push.js` adapts that API to Capacitor and is injected at document start
-on both platforms. It runs only in the main frame at `https://linolife.co`. The
-existing website continues to request permission after the user taps Enable,
-save the native token to `/push/devices` with session/CSRF protection, handle
-notification taps, and unlink the account before token deletion on logout.
-The adapter does not request permission or register a device on its own.
-Token refreshes are fetched again when the website registers on load/resume.
+The bundled native push adapter is injected at document start on Android and
+iOS for the main frame on https://linolife.co. It exposes LinoLifeNativePush
+with the platform and app portal, and keeps the Median callback contract for
+older deployed pages. The updated Laravel client saves tokens after opt-in,
+refreshes the same inbox in response to notifications, and opens owned
+notification links inside the current app portal.
 
 Before verifying iPhone delivery on a Mac:
 
@@ -126,7 +124,7 @@ Before verifying iPhone delivery on a Mac:
    not already configured. The supplied plist does not include this key. Keep the
    APNs private key in Firebase; it does not belong in the app bundle.
 3. Ensure the hosted backend has FCM enabled and valid server credentials for
-   project `linolife`. Client JSON/plist files do not configure server sending.
+   project `linolife-8901b`. Client JSON/plist files do not configure server sending.
 4. Install the new app, sign in, tap Enable notifications, allow permission and
    send a test from the notification inbox. Verify foreground, background and
    closed-app delivery and tap navigation. Repeat on Android 13+ and iOS.
